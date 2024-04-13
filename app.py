@@ -2,6 +2,7 @@ import os
 from collections import deque
 from multiprocessing import Process
 from tkinter import Tk, ttk, filedialog, Text, END, StringVar, DISABLED, scrolledtext
+from pathlib import Path
 
 # Create the main window
 root = Tk()
@@ -17,6 +18,7 @@ notebook.bind("<<NotebookTabChanged>>", lambda _: root.update_idletasks())
 
 def select_config_file():
   filepath = filedialog.askopenfilename(
+      initialdir=str(Path.home()),
       title="Select a configuration file",
       filetypes=[("Config files", ".cfg")]
   )
@@ -26,6 +28,7 @@ def select_config_file():
 
 def select_input_path():
   filepath = filedialog.askdirectory(
+      initialdir=str(Path.home()),
       title="Select a input directory"
   )
   if filepath:
@@ -34,6 +37,7 @@ def select_input_path():
 
 def select_output_path():
   filepath = filedialog.askdirectory(
+      initialdir=str(Path.home()),
       title="Select a output directory"
   )
   if filepath:
@@ -95,6 +99,7 @@ def append_progress():
 progress.after(100, append_progress)
 
 def process_file(file):
+  progress_msgs.append('Processing file ' + file + '....')
   pass
 
 def process_all_files():
@@ -130,8 +135,10 @@ def process_all_files():
     progress_msgs.append('ERROR: Output directory not found')
     return
   
-  for file in os.listdir(output_path):
-    progress_msgs.append('Processing file ' + file + '....')
+  for file in os.listdir(input_path):
+    filename, file_extension = os.path.splitext(file)
+    if file_extension not in ['.pdf']:
+      continue
     process_file(file)
 
 def run():
