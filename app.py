@@ -3,6 +3,12 @@ from collections import deque
 from multiprocessing import Process
 from tkinter import Tk, ttk, filedialog, Text, END, StringVar, DISABLED, scrolledtext
 from pathlib import Path
+from io import StringIO
+import fitz  # PyMuPDF
+import configparser
+import pytesseract
+from PIL import Image
+import re
 
 # Create the main window
 root = Tk()
@@ -187,8 +193,38 @@ def select_template_pdf_file():
 template_pdf_button = ttk.Button(tab2, text="Select File", command=select_template_pdf_file)
 template_pdf_button.grid(row = 0, column = 2, padx = 2, pady=2)
 
-def get_configuration(filepath):
-  return 'configuration'
+def get_configuration(pdf_name):
+    doc = fitz.open(pdf_name)
+
+    config = configparser.ConfigParser()
+    config['Files'] = {'INPUT': '', 'OUTPUT': ''}
+    config['OCR'] = {}
+
+    annotation_count = 0
+    for page_number, page in enumerate(doc):
+        page_annotations = list(page.annots())
+        if not page_annotations:
+            continue
+
+        for i, annotation in enumerate(page_annotations):
+            rect = annotation.rect
+            sub_pix = page.get_pixmap(clip=rect)
+            img = Image.frombytes("RGB", [sub_pix.width, sub_pix.height], sub_pix.samples)
+            extracted_text = pytesseract.image_to_string(img)
+            clean_text = ' '.join(extracted_text.replace('\n', ' ').split())
+            clean_text = re.sub(r'[^a-zA-Z0-9 -]', '', clean_text)
+            config['OCR'][f'Text{annotation_count + 1}'] = f'"{clean_text.lower()}"'
+            config['OCR'][f'Loc{annotation_count + 1}'] = f"{int(rect.x0)},{int(rect.y0)},{int(rect.x1)},{int(rect.y1)}"
+            annotation_count += 1
+
+    doc.close()
+
+    config_string = StringIO()
+    config.write(config_string)
+    config_string.seek(0)
+
+    return config_string.read()
+
 
 def process_pdf_template():
   clear_create_config_progress()
