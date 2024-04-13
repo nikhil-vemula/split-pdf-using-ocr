@@ -207,6 +207,15 @@ def process_pdf_template():
 template_pdf_process_button = ttk.Button(tab2, text="Process", command=process_pdf_template)
 template_pdf_process_button.grid(row = 0, column = 3, padx = 2, pady=2)
 
+def cancel_config_file():
+  clear_create_config_progress()
+  set_create_config_progress("Select template pdf and click 'Process'")
+  template_pdf_entry.delete(0, END)
+  root.update_idletasks()
+
+config_cancel_button = ttk.Button(tab2, text="Cancel", command=cancel_config_file)
+config_cancel_button.grid(row = 2, column = 2, padx =10, pady=10)
+
 def save_config_file():
    content = create_config_progress.get(1.0, END).strip()
    f = filedialog.asksaveasfile(initialfile = 'sample_config.cfg', defaultextension=".cfg",filetypes=[("Config Files","*.cfg")])
