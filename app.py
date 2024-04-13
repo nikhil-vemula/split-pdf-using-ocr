@@ -10,11 +10,21 @@ import pytesseract
 from PIL import Image
 import re
 
+
+def center_window(width=300, height=200):
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    root.geometry('%dx%d+%d+%d' % (width, height, x, y))
+
 # Create the main window
 root = Tk()
 ttk.Style().theme_use('clam')
 root.title("PDF Splitter")
-root.minsize(width='1000', height='500')
+center_window(1000, 600)
+# root.minsize(width='1000', height='500')
 
 
 # Create the notebook (tabs)
@@ -146,6 +156,8 @@ def process_all_files():
     if file_extension not in ['.pdf']:
       continue
     process_file(file)
+  
+  messagebox.showinfo(title='Success', message='Done')
 
 def run():
   p = Process(target=process_all_files)
@@ -160,7 +172,6 @@ run_button.grid(row=4, column=1, columnspan=2)
 
 tab2 = ttk.Frame(notebook)
 notebook.add(tab2, text="Create Configuration")
-notebook.select(tab2)
 tab2.grid_columnconfigure(1, weight=1)
 
 template_pdf_label = ttk.Label(tab2, text="Template PDF")
@@ -264,9 +275,9 @@ def save_config_file():
 config_save_button = ttk.Button(tab2, text="Save", command=save_config_file, state=DISABLED)
 config_save_button.grid(row = 2, column = 3, padx =10, pady=10)
 
-# Tab 3
-tab3 = ttk.Frame(notebook)
-notebook.add(tab3, text="Tools")
+# # Tab 3
+# tab3 = ttk.Frame(notebook)
+# notebook.add(tab3, text="Tools")
 
 # Run the main loop
 root.mainloop()
