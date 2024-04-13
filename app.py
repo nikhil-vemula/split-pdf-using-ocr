@@ -203,6 +203,7 @@ def process_pdf_template():
     return
   
   set_create_config_progress(get_configuration(template_pdf))
+  config_save_button.config(state='active')
 
 template_pdf_process_button = ttk.Button(tab2, text="Process", command=process_pdf_template)
 template_pdf_process_button.grid(row = 0, column = 3, padx = 2, pady=2)
@@ -211,6 +212,7 @@ def cancel_config_file():
   clear_create_config_progress()
   set_create_config_progress("Select template pdf and click 'Process'")
   template_pdf_entry.delete(0, END)
+  config_save_button.config(state='disabled')
   root.update_idletasks()
 
 config_cancel_button = ttk.Button(tab2, text="Cancel", command=cancel_config_file)
@@ -222,7 +224,7 @@ def save_config_file():
    f.write(content)
    f.close()
 
-config_save_button = ttk.Button(tab2, text="Save", command=save_config_file)
+config_save_button = ttk.Button(tab2, text="Save", command=save_config_file, state=DISABLED)
 config_save_button.grid(row = 2, column = 3, padx =10, pady=10)
 
 # Tab 3
