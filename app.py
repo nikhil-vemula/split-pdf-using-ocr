@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Create the main window
 root = Tk()
-ttk.Style().theme_use('clam') 
+ttk.Style().theme_use('clam')
 root.title("PDF Splitter")
 root.minsize(width='1000', height='500')
 
@@ -163,28 +163,16 @@ template_pdf_label.grid(row = 0, column = 0, sticky = 'W', pady = 2)
 template_pdf_entry = ttk.Entry(tab2)
 template_pdf_entry.grid(row = 0, column = 1, sticky = 'EW', pady = 2)
 
-create_config_progress_msgs = deque()
-create_config_progress = scrolledtext.ScrolledText(tab2, bg='white', fg='black')
+create_config_progress = scrolledtext.ScrolledText(tab2, bg='white', fg='black', insertbackground='black', font=("Arial 16"))
 create_config_progress.grid(row=1, column=0, columnspan=4, sticky='ew', pady=20)
 
-create_config_progress_msgs.append("Select template pdf and click 'Process'")
-
 def clear_create_config_progress():
-  create_config_progress.configure(state='normal')
   create_config_progress.delete(1.0, END)
-  create_config_progress.configure(state='disabled')
 
-def append_create_config_progress():
-  if create_config_progress_msgs:
-    msg = create_config_progress_msgs.popleft()
-    if msg:
-      create_config_progress.configure(state='normal')
-      create_config_progress.insert(END, msg + '\n')
-      create_config_progress.configure(state='disabled')
-      create_config_progress.update_idletasks()
-  create_config_progress.after(100, append_create_config_progress)
-
-create_config_progress.after(100, append_create_config_progress)
+def set_create_config_progress(msg):
+   create_config_progress.insert(END, msg + '\n')
+  
+set_create_config_progress("Select template pdf and click 'Process'")
 
 def select_template_pdf_file():
   filepath = filedialog.askopenfilename(
@@ -207,14 +195,14 @@ def process_pdf_template():
   template_pdf = template_pdf_entry.get()
 
   if not template_pdf:
-    create_config_progress_msgs.append('ERROR: Please provide template pdf file')
+    set_create_config_progress('ERROR: Please provide template pdf file')
     return
 
   if not os.path.exists(template_pdf):
-    create_config_progress_msgs.append('ERROR: File not found')
+    set_create_config_progress('ERROR: File not found')
     return
   
-  create_config_progress_msgs.append(get_configuration(template_pdf))
+  set_create_config_progress(get_configuration(template_pdf))
 
 template_pdf_process_button = ttk.Button(tab2, text="Process", command=process_pdf_template)
 template_pdf_process_button.grid(row = 0, column = 3, padx = 2, pady=2)
@@ -226,7 +214,7 @@ def save_config_file():
    f.close()
 
 config_save_button = ttk.Button(tab2, text="Save", command=save_config_file)
-config_save_button.grid(row = 2, column = 3, padx = 2, pady=2)
+config_save_button.grid(row = 2, column = 3, padx =10, pady=10)
 
 # Tab 3
 tab3 = ttk.Frame(notebook)
