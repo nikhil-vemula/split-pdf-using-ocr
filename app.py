@@ -1,7 +1,7 @@
 import os
 from collections import deque
 from multiprocessing import Process
-from tkinter import Tk, ttk, filedialog, Text, END, StringVar, DISABLED, scrolledtext
+from tkinter import Tk, ttk, filedialog, Text, END, StringVar, DISABLED, scrolledtext, messagebox
 from pathlib import Path
 from io import StringIO
 import fitz  # PyMuPDF
@@ -197,7 +197,7 @@ def get_configuration(pdf_name):
     doc = fitz.open(pdf_name)
 
     config = configparser.ConfigParser()
-    config['Files'] = {'INPUT': '', 'OUTPUT': ''}
+    config['Files'] = {'Template': '"' + pdf_name + '"'}
     config['OCR'] = {}
 
     annotation_count = 0
@@ -259,6 +259,7 @@ def save_config_file():
    f = filedialog.asksaveasfile(initialfile = 'sample_config.cfg', defaultextension=".cfg",filetypes=[("Config Files","*.cfg")])
    f.write(content)
    f.close()
+   messagebox.showinfo(title='Success', message='Saved the configuration file successfully')
 
 config_save_button = ttk.Button(tab2, text="Save", command=save_config_file, state=DISABLED)
 config_save_button.grid(row = 2, column = 3, padx =10, pady=10)
