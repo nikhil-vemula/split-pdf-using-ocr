@@ -143,18 +143,83 @@ run_button.grid(row=4, column=1, columnspan=2)
 
 
 # Tab 2
+
+
 tab2 = ttk.Frame(notebook)
 notebook.add(tab2, text="Create Configuration")
+notebook.select(tab2)
 tab2.grid_columnconfigure(1, weight=1)
 
-label1 = ttk.Label(tab2, text="Template PDF")
-label1.grid(row = 0, column = 0, sticky = 'W', pady = 2)
+template_pdf_label = ttk.Label(tab2, text="Template PDF")
+template_pdf_label.grid(row = 0, column = 0, sticky = 'W', pady = 2)
 
-entry1 = ttk.Entry(tab2)
-entry1.grid(row = 0, column = 1, sticky = 'EW', pady = 2)
+template_pdf_entry = ttk.Entry(tab2)
+template_pdf_entry.grid(row = 0, column = 1, sticky = 'EW', pady = 2)
 
-button1 = ttk.Button(tab2, text="Select File", command=select_config_file)
-button1.grid(row = 0, column = 2, padx = 2, pady=2)
+create_config_progress_msgs = deque()
+create_config_progress = scrolledtext.ScrolledText(tab2, bg='white', fg='black')
+create_config_progress.grid(row=1, column=0, columnspan=4, sticky='ew', pady=20)
+
+create_config_progress_msgs.append("Select template pdf and click 'Process'")
+
+def clear_create_config_progress():
+  create_config_progress.configure(state='normal')
+  create_config_progress.delete(1.0, END)
+  create_config_progress.configure(state='disabled')
+
+def append_create_config_progress():
+  if create_config_progress_msgs:
+    msg = create_config_progress_msgs.popleft()
+    if msg:
+      create_config_progress.configure(state='normal')
+      create_config_progress.insert(END, msg + '\n')
+      create_config_progress.configure(state='disabled')
+      create_config_progress.update_idletasks()
+  create_config_progress.after(100, append_create_config_progress)
+
+create_config_progress.after(100, append_create_config_progress)
+
+def select_template_pdf_file():
+  filepath = filedialog.askopenfilename(
+      title="Select a template pdf file",
+      filetypes=[("PDF FIles", ".pdf")]
+  )
+  if filepath:
+    template_pdf_entry.delete(0, END)
+    template_pdf_entry.insert(0, filepath)
+
+
+template_pdf_button = ttk.Button(tab2, text="Select File", command=select_template_pdf_file)
+template_pdf_button.grid(row = 0, column = 2, padx = 2, pady=2)
+
+def get_configuration(filepath):
+  return 'configuration'
+
+def process_pdf_template():
+  clear_create_config_progress()
+  template_pdf = template_pdf_entry.get()
+
+  if not template_pdf:
+    create_config_progress_msgs.append('ERROR: Please provide template pdf file')
+    return
+
+  if not os.path.exists(template_pdf):
+    create_config_progress_msgs.append('ERROR: File not found')
+    return
+  
+  create_config_progress_msgs.append(get_configuration(template_pdf))
+
+template_pdf_process_button = ttk.Button(tab2, text="Process", command=process_pdf_template)
+template_pdf_process_button.grid(row = 0, column = 3, padx = 2, pady=2)
+
+def save_config_file():
+   content = create_config_progress.get(1.0, END).strip()
+   f = filedialog.asksaveasfile(initialfile = 'sample_config.cfg', defaultextension=".cfg",filetypes=[("Config Files","*.cfg")])
+   f.write(content)
+   f.close()
+
+config_save_button = ttk.Button(tab2, text="Save", command=save_config_file)
+config_save_button.grid(row = 2, column = 3, padx = 2, pady=2)
 
 # Tab 3
 tab3 = ttk.Frame(notebook)
