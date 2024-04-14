@@ -42,7 +42,7 @@ It involves two steps
 
 #### Creating a template pdf with annotations
 
-Use `Adobe Acrobat` to create create annotation as shown below and save the the pdf after annotating all the PDF page as required.
+Use `Adobe Acrobat` to create annotation as shown below and save the the pdf after annotating all the PDF page as required.
 
 ![Annotate pdf](./images/annotate.jpeg)
 
