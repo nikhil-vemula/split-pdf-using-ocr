@@ -1,8 +1,6 @@
----
-colorlinks: true
----
-
 # Split PDF using OCR
+
+[Download PDFSplitter](https://github.com/nikhil-vemula/split-pdf-using-ocr/releases/download/v0.1/PDFSplitter.exe)
 
 ## Contents
 
