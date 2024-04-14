@@ -2,6 +2,10 @@
 
 [Download PDFSplitter](https://github.com/nikhil-vemula/split-pdf-using-ocr/releases/download/v0.1/PDFSplitter.exe)
 
+## Youtube Video
+
+Link: https://www.youtube.com/watch?v=V7wUBW-en-4
+
 ## Contents
 
 - [Problem Statement](#problem-statement)
