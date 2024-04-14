@@ -48,7 +48,7 @@ Use `Adobe Acrobat` to create annotation as shown below and save the the pdf aft
 
 #### Creating configuration using app
 
-You can select the above created pdf in the application to generate the configuration file automatically. You can modify or add any more conifurations and save the configuration file.
+You can select the above created pdf in the application to generate the configuration file automatically. You can modify or add any more conifugrations and save the configuration file.
 
 ![Config creation](./images/config.png)
 
