@@ -179,10 +179,7 @@ def process_pdf(pdf_path, output_path, ocr_config):
 def process_file(filename, ocr_config, input_path, output_path):
     try:
         pdf_path = os.path.join(input_path, filename)
-        # print('Processing', pdf_path)
-        # append_progress_info(f'Processing {pdf_path}')
         process_pdf(pdf_path, output_path, ocr_config)
-        # append_progress_info(f'Processed {pdf_path}')
     except Exception as e:
         append_progress_info(f'Failed to process {filename}: {str(e)}')
 
@@ -221,8 +218,9 @@ def check_on_threads():
   i = 0
   while i < can_start and i < len(task_queue):
       filename, ocr_config, input_path, output_path  = task_queue.popleft()
-      append_progress_info(f'Processing {input_path}')
-      t = threading.Thread(target=process_file, name=input_path, args=[filename, ocr_config, input_path, output_path])
+      file_path = input_path + '\\' + filename
+      append_progress_info(f'Processing {file_path}')
+      t = threading.Thread(target=process_file, name=file_path, args=[filename, ocr_config, input_path, output_path])
       t.start()
       thread_queue.append(t)
       i += 1
@@ -250,29 +248,29 @@ def process_all_files():
   config_file = config_file_entry.get()
  
   if not config_file:
-    progress_msgs.append('ERROR: Configuration file can not be empty')
+    append_progress_info('ERROR: Configuration file can not be empty')
     return
 
   if not os.path.exists(config_file):
-    progress_msgs.append('ERROR: Configuration file not found')
+    append_progress_info('ERROR: Configuration file not found')
     return
 
   input_path = input_path_entry.get()
   if not input_path:
-    progress_msgs.append('ERROR: Input directory can not be empty')
+    append_progress_info('ERROR: Input directory can not be empty')
     return
 
   if not os.path.exists(input_path):
-    progress_msgs.append('ERROR: Input directory not found')
+    append_progress_info('ERROR: Input directory not found')
     return
   
   output_path = output_path_entry.get()
   if not output_path:
-    progress_msgs.append('ERROR: Output directory can not be empty')
+    append_progress_info('ERROR: Output directory can not be empty')
     return
 
   if not os.path.exists(output_path):
-    progress_msgs.append('ERROR: Output directory not found')
+    append_progress_info('ERROR: Output directory not found')
     return
   
   ocr_config = get_ocr_config()
@@ -284,7 +282,6 @@ def process_all_files():
 
     # Start processing each pdf file using threads
     task_queue.append((file, ocr_config, input_path, output_path))
-    # process_file(file, ocr_config, input_path, output_path)
   check_on_threads()
   
   
