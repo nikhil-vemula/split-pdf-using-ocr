@@ -10,6 +10,8 @@ import pytesseract
 from PIL import Image
 import re
 from PyPDF2 import PdfWriter, PdfReader
+import threading
+from queue import Queue
 
 #Windows
 if os.name == 'nt':
@@ -104,20 +106,19 @@ output_path_entry.grid(row = 3, column = 1, sticky = 'EW', pady = 2)
 output_path_select = ttk.Button(tab1, text="Select", command=select_output_path)
 output_path_select.grid(row = 3, column = 2, padx = 2, pady=2)
 
-progress_msgs = deque()
 progress = scrolledtext.ScrolledText(tab1, state=DISABLED, bg='white', fg='black')
 progress.grid(row=5, column=0, columnspan=4, sticky='ew', pady=20)
 
-def append_progress():
-  if progress_msgs:
-    msg = progress_msgs.popleft()
-    progress.configure(state='normal')
-    progress.insert(END, msg + '\n')
-    progress.configure(state='disabled')
-    progress.update_idletasks()
-  progress.after(100, append_progress)
+def clear_progress():
+  progress.configure(state='normal')
+  progress.delete(1.0, END)
+  progress.configure(state='disabled')
 
-progress.after(100, append_progress)
+def append_progress_info(msg):
+  progress.configure(state='normal')
+  progress.insert(END, msg + '\n')
+  progress.configure(state='disabled')
+  progress.update_idletasks()
 
 def process_pdf(pdf_path, output_path, ocr_config):
   pdf_reader = PdfReader(pdf_path)
@@ -168,65 +169,77 @@ def process_pdf(pdf_path, output_path, ocr_config):
 
   pdf.close()
 
-def process_file(file):
-  # Load configuration from the user-provided config file
-    config_file = config_file_entry.get()
-    if not config_file:
-        messagebox.showerror("Error", "Configuration file is required!")
-        return
+def process_file(filename, ocr_config, input_path, output_path):
+    try:
+        pdf_path = os.path.join(input_path, filename)
+        # print('Processing', pdf_path)
+        # append_progress_info(f'Processing {pdf_path}')
+        process_pdf(pdf_path, output_path, ocr_config)
+        # append_progress_info(f'Processed {pdf_path}')
+    except Exception as e:
+        append_progress_info(f'Failed to process {filename}: {str(e)}')
+
+def get_ocr_config():
+  config_file = config_file_entry.get()
+  if not config_file:
+      messagebox.showerror("Error", "Configuration file is required!")
+      return
+  
+  config = configparser.ConfigParser()
+  config.read(config_file)
+
+  ocr_config = {}
+  ocr_pattern = re.compile(r'text(\d+)')
+  for section in config.sections():
+      if section == 'OCR':
+          for key, value in config[section].items():
+              match = ocr_pattern.match(key)
+              if match:
+                  index = match.group(1)  # The digit part from 'Text' key
+                  doc_type = value.strip('"').lower()
+                  loc_key = f'loc{index}'  # Corresponding 'Loc' key
+                  if loc_key in config[section]:
+                      loc = tuple(map(int, config[section][loc_key].split(',')))
+                      ocr_config[doc_type] = loc
+  return ocr_config
+
+task_queue = deque()
+thread_queue = []
+
+def check_on_threads():
+  # We should check on threads cause they are working for us.
+  running_threads = len(thread_queue)
+  can_start = 5 - running_threads
+
+  i = 0
+  while i < can_start and i < len(task_queue):
+      filename, ocr_config, input_path, output_path  = task_queue.popleft()
+      append_progress_info(f'Processing {input_path}')
+      t = threading.Thread(target=process_file, name=input_path, args=[filename, ocr_config, input_path, output_path])
+      t.start()
+      thread_queue.append(t)
+      i += 1
     
-    config = configparser.ConfigParser()
-    config.read(config_file)
+  i = 0
+  print('Status')
+  print([t.is_alive() for t in thread_queue])
+  while i < len(thread_queue):
+    t = thread_queue[i]
+    if not t.is_alive():
+      thread_queue.pop(i)
+      append_progress_info(f'Processed {t.name}')
+    else:
+     i += 1
+    
+  if task_queue or thread_queue:
+     root.after(1000, check_on_threads)
+  else:
+     print('Complete')
+     messagebox.showinfo(title='Completed', message='All files processed')
 
-    # Extract configuration details as done in your script
-    # Assuming configuration settings are correctly formatted
-    ocr_config = {}
-    # Your existing code to extract OCR configurations goes here
-
-    input_path = input_path_entry.get()
-    output_path = output_path_entry.get()
-
-    if not os.path.exists(input_path):
-        messagebox.showerror("Error", "Input path does not exist!")
-        return
-
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
-    # Process each file in the input directory
-    for filename in os.listdir(input_path):
-        if filename.lower().endswith('.pdf'):
-            pdf_path = os.path.join(input_path, filename)
-            try:
-                ocr_pattern = re.compile(r'text(\d+)')  # Pattern to match Text entries
-                for section in config.sections():
-                    if section == 'OCR':
-                        for key, value in config[section].items():
-                            #print(key, value)
-                            match = ocr_pattern.match(key)
-                            if match:
-                                index = match.group(1)  # The digit part from 'Text' key
-                                doc_type = value.strip('"').lower()
-                                loc_key = f'loc{index}'  # Corresponding 'Loc' key
-                                if loc_key in config[section]:
-                                    loc = tuple(map(int, config[section][loc_key].split(',')))
-                                    ocr_config[doc_type] = loc
-                #print(ocr_config)
-                # Function to process each PDF file
-                pdf_path = os.path.join(input_path, filename)
-                print(pdf_path, output_path, ocr_config)
-                process_pdf(pdf_path, output_path, ocr_config)
-                progress_msgs.append(f'Processed {filename}')
-            except Exception as e:
-                progress_msgs.append(f'Failed to process {filename}: {str(e)}')
-
-    messagebox.showinfo("Completion", "All files processed")
 
 def process_all_files():
-  progress.configure(state='normal')
-  progress.delete(1.0, END)
-  progress.configure(state='disabled')
-
+  clear_progress()
   config_file = config_file_entry.get()
  
   if not config_file:
@@ -255,25 +268,30 @@ def process_all_files():
     progress_msgs.append('ERROR: Output directory not found')
     return
   
+  ocr_config = get_ocr_config()
+  
   for file in os.listdir(input_path):
     filename, file_extension = os.path.splitext(file)
     if file_extension not in ['.pdf']:
       continue
-    process_file(file)
+
+    # Start processing each pdf file using threads
+    task_queue.append((file, ocr_config, input_path, output_path))
+    # process_file(file, ocr_config, input_path, output_path)
+  check_on_threads()
   
-  messagebox.showinfo(title='Success', message='Done')
+  
 
 def run():
-  p = Process(target=process_all_files)
-  p.run()
+  process_all_files()
+  # p = Process(target=process_all_files)
+  # p.start()
 
 run_button = ttk.Button(tab1, text='Split Files', command=run)
 run_button.grid(row=4, column=1, columnspan=2)
 
 
 # Tab 2
-
-
 tab2 = ttk.Frame(notebook)
 notebook.add(tab2, text="Create Configuration")
 tab2.grid_columnconfigure(1, weight=1)
