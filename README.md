@@ -25,7 +25,7 @@ As part of Luddy hackathon, 2024. We worked on creating a standalone application
 
 1. [Nikhil Vemula](https://github.com/nikhil-vemula)
 2. [Pavan Vemulapalli](https://github.com/vpavansai24)
-3. [Bhargavi Thanneeru](https://github.com/bhargavithanneeru)
+3. [Bhargavi Thanneeru](https://github.com/bhargavithanneeru)&nbsp;&nbsp;[![LinkedIn](https://i.stack.imgur.com/gVE0j.png)](https://www.linkedin.com/in/bhargavi-thanneeru-11032615a/)
 4. Krishna Jillelamudi&nbsp;&nbsp;[![LinkedIn](https://i.stack.imgur.com/gVE0j.png)](https://www.linkedin.com/in/krishna-teja-jillelamudi/)&nbsp;&nbsp;[![GitHub](https://i.stack.imgur.com/tskMh.png)](https://github.com/KrishnaTejaJ)
 
 ## Features
