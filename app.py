@@ -15,8 +15,15 @@ from queue import Queue
 
 #Windows
 if os.name == 'nt':
-    #Tesseract installation issues: https://stackoverflow.com/a/67657995/11436515
-    pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+  if getattr(sys, 'frozen', False):
+      # If the application is run as a bundle, the PyInstaller bootloader
+      # extends the sys module by a flag frozen=True and sets the app 
+      # path into variable _MEIPASS'.
+      application_path = sys._MEIPASS
+  else:
+      application_path = 'C:\\Program Files\\'
+  tesseract_cmd_path = os.path.join(application_path, 'Tesseract-OCR', 'tesseract.exe')
+  pytesseract.pytesseract.tesseract_cmd = tesseract_cmd_path
 
 def center_window(width=300, height=200):
     screen_width = root.winfo_screenwidth()
