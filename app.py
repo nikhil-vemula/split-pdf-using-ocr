@@ -12,8 +12,9 @@ import re
 from PyPDF2 import PdfWriter, PdfReader
 
 #Windows
-#Tesseract installation issues: https://stackoverflow.com/a/67657995/11436515
-pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+if os.name == 'nt':
+    #Tesseract installation issues: https://stackoverflow.com/a/67657995/11436515
+    pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 def center_window(width=300, height=200):
     screen_width = root.winfo_screenwidth()
