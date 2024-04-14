@@ -61,7 +61,7 @@ You can select the above created pdf in the application to generate the configur
 
 ### Installation
 
-> For mac os, you should be able to intall the equivalent libraries in windows.
+> For mac os, you should be able to install the equivalent libraries in windows.
 
 #### Install tkinter
 
