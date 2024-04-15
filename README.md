@@ -85,6 +85,12 @@ brew install tesseract
 pip install -r requirements.txt
 ```
 
+## Build
+
+```
+pyinstaller --onefile --windowed --icon=icons/icon.ico --name=PDFSplitter --add-data "C:\Program Files\Tesseract-OCR;Tesseract-OCR" app.py
+```
+
 ## Challenges
 
 - Understanding the unique legal document use case and the need for this application

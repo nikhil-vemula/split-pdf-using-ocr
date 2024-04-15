@@ -1,2 +1,6 @@
 .python-version
 sample_pdfs/output/*
+build/*
+*.spec
+.venv/*
+dist/*
